@@ -1,0 +1,112 @@
+body{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0px;
+            padding: 0px;
+            background: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        header{background-color: #0077cc;
+            color: white;
+            text-align: center;
+            padding: 20px ,40px;
+        }
+        header h1{margin: 0px;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+         nav {
+      background: #004a99;
+         } 
+         nav ul{
+             margin: 0px;
+            padding: 0px;
+            list-style: none;
+            display: flex;
+            justify-content: center;
+         }
+
+        nav li {
+    margin: 0;
+    } 
+           nav a {
+    display: block;
+    padding: 15px 25px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+         }  nav a:hover,
+  nav a:focus {
+    background-color: #003366;
+  }
+
+  main {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+
+  .content-section {
+    background: white;
+    padding: 20px 30px;
+    margin-bottom: 30px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  .content-section h2 {
+    margin-top: 0;
+  }
+
+  .content-section img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+
+  footer {
+    background-color: #222;
+    color: #eee;
+    text-align: center;
+    padding: 20px 10px;
+    font-size: 0.9rem;
+  }
+
+           @media (max-width: 600px) {
+    header {
+      padding: 15px 20px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+    }
+
+    nav ul {
+      flex-direction: column;
+    }
+
+    nav a {
+      padding: 12px 10px;
+      border-top: 1px solid #003366;
+      text-align: center;
+    }
+
+    nav a:first-child {
+      border-top: none;
+    }
+
+    main {
+      margin: 20px 10px;
+      padding: 0 10px;
+    }
+
+    .content-section {
+      padding: 15px 15px;
+      margin-bottom: 20px;
+    }
+
+    .content-section h2 {
+      font-size: x-large;
+    }
+  }
