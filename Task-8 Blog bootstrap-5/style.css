@@ -1,0 +1,105 @@
+/* Custom variables & global styles */
+
+html {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  background-color: #ffffff;
+  color: #6b7280; /* neutral gray for body text */
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  scroll-padding-top: 70px; /* navbar height */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #111827; /* darker text for headings */
+  font-weight: 700;
+}
+
+h1.display-3 {
+  font-weight: 800;
+  font-size: 3.5rem; /* ~56px for big headlines */
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.card.blog-card {
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 0.06);
+  transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #ffffff;
+}
+
+.card.blog-card:hover,
+.card.blog-card:focus-within {
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.15);
+  transform: translateY(-4px);
+}
+
+.card-img-top {
+  border-top-left-radius: 0.75rem !important;
+  border-top-right-radius: 0.75rem !important;
+  object-fit: cover;
+  height: 220px;
+  width: 100%;
+}
+
+.navbar-nav .nav-link {
+  color: #374151;
+  transition: color 0.3s ease, transform 0.3s ease;
+  position: relative;
+  font-weight: 600;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+  color: #111827;
+  transform: scale(1.04);
+}
+
+.navbar-nav .nav-link.active {
+  color: #111827;
+  font-weight: 700;
+}
+
+.btn-primary {
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #1e40af;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgb(59 130 246 / 0.4);
+}
+
+footer {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+
+@media (max-width: 576px) {
+  h1.display-3 {
+    font-size: 2.5rem;
+  }
+  .card-img-top {
+    height: 180px;
+  }
+}
