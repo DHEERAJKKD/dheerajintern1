@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VaultNotes - Encrypted Note Taking</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #8b5cf6;
+            --primary-dark: #6d28d9;
+            --error: #ef4444;
+            --error-light: #fecaca;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #f9fafb;
+            --bg-light: #ffffff;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background-color: var(--bg);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
+        }
+
+        .auth-panel {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-light);
+        }
+
+        .btn-outline:hover {
+            color: var(--primary);
+            border-color: var(--primary-light);
+        }
+
+        .app-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            height: calc(100vh - 120px);
+        }
+
+        .note-list {
+            border-right: 1px solid var(--border);
+            padding-right: 20px;
+            overflow-y: auto;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 0.875rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            pointer-events: none;
+        }
+
+        .notes {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .note-card {
+            padding: 12px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .note-card:hover {
+            border-color: var(--primary);
+        }
+
+        .note-card.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .note-card h3 {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-card p {
+            font-size: 0.75rem;
+            color: inherit;
+            opacity: 0.7;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-card.active p {
+            color: white;
+        }
+
+        .note-editor {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-title {
+            flex: 1;
+        }
+
+        .editor-title input {
+            width: 100%;
+            border: none;
+            font-size: 1.5rem;
+            font-weight: 600;
+            padding: 5px 0;
+            border-bottom: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .editor-title input:focus {
+            outline: none;
+            border-bottom-color: var(--border);
+        }
+
+        .editor-title input::placeholder {
+            color: var(--text-light);
+            opacity: 0.5;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .editor-content {
+            flex: 1;
+        }
+
+        .editor-content textarea {
+            width: 100%;
+            height: 100%;
+            border: none;
+            resize: none;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.6;
+            padding: 5px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .editor-content textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .security-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 0;
+            font-size: 0.875rem;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .security-status svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-light);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 20px;
+            fill: currentColor;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            max-width: 360px;
+            font-size: 0.875rem;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            transform: translateY(-20px);
+            transition: transform 0.2s;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 0.875rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .app-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .note-list {
+                border-right: none;
+                padding-right: 0;
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 20px;
+                max-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                    </svg>
+                </div>
+                <span>VaultNotes</span>
+            </div>
+            <div class="auth-panel">
+                <button class="btn btn-outline" id="changePassBtn">Change Password</button>
+                <button class="btn btn-primary" id="newNoteBtn">New Note</button>
+            </div>
+        </header>
+
+        <div class="app-layout">
+            <div class="note-list">
+                <div class="search-bar">
+                    <div class="search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z"/>
+                        </svg>
+                    </div>
+                    <input type="text" id="searchInput" placeholder="Search notes...">
+                </div>
+
+                <div class="notes" id="notesList">
+                    <!-- Notes will be inserted here -->
+                </div>
+            </div>
+
+            <div class="note-editor">
+                <div id="emptyState" class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                    </svg>
+                    <h3>No note selected</h3>
+                    <p>Select an existing note from the sidebar or create a new one to get started.</p>
+                    <button class="btn btn-primary" id="emptyStateNewBtn">Create New Note</button>
+                </div>
+
+                <div id="editorPane" style="display: none;">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <input type="text" id="noteTitleInput" placeholder="Note title">
+                        </div>
+                        <div class="editor-actions">
+                            <button class="btn btn-outline" id="deleteNoteBtn">Delete</button>
+                            <button class="btn btn-primary" id="saveNoteBtn">Save</button>
+                        </div>
+                    </div>
+
+                    <div class="security-status">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM12 7C13.1 7 14 7.9 14 9C14 10.1 13.1 11 12 11C10.9 11 10 10.1 10 9C10 7.9 10.9 7 12 7ZM16 17.13C16 15.97 14.5 15.19 12 15.19C9.5 15.19 8 15.97 8 17.13V18H16V17.13Z"/>
+                        </svg>
+                        <span>End-to-end encrypted</span>
+                    </div>
+
+                    <div class="editor-content">
+                        <textarea id="noteContentInput" placeholder="Write your note here..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Set Encryption Password</h2>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="passwordInput">Password</label>
+                    <input type="password" id="passwordInput" placeholder="Enter encryption password">
+                    <div class="error-message" id="passwordError">Password cannot be empty</div>
+                </div>
+                <div class="form-group" id="confirmPassGroup">
+                    <label for="confirmPassInput">Confirm Password</label>
+                    <input type="password" id="confirmPassInput" placeholder="Confirm password">
+                    <div class="error-message" id="confirmPassError">Passwords do not match</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App state
+        let notes = [];
+        let currentNoteId = null;
+        let isPasswordSet = false;
+        let encryptionPassword = null;
+
+        // DOM elements
+        const notesListEl = document.getElementById('notesList');
+        const editorPaneEl = document.getElementById('editorPane');
+        const emptyStateEl = document.getElementById('emptyState');
+        const noteTitleInputEl = document.getElementById('noteTitleInput');
+        const noteContentInputEl = document.getElementById('noteContentInput');
+        const saveNoteBtnEl = document.getElementById('saveNoteBtn');
+        const deleteNoteBtnEl = document.getElementById('deleteNoteBtn');
+        const newNoteBtnEl = document.getElementById('newNoteBtn');
+        const emptyStateNewBtnEl = document.getElementById('emptyStateNewBtn');
+        const searchInputEl = document.getElementById('searchInput');
+        const changePassBtnEl = document.getElementById('changePassBtn');
+        
+        // Modal elements
+        const passwordModalEl = document.getElementById('passwordModal');
+        const passwordInputEl = document.getElementById('passwordInput');
+        const confirmPassInputEl = document.getElementById('confirmPassInput');
+        const passwordErrorEl = document.getElementById('passwordError');
+        const confirmPassErrorEl = document.getElementById('confirmPassError');
+        const confirmPassGroupEl = document.getElementById('confirmPassGroup');
+        const modalTitleEl = document.getElementById('modalTitle');
+        const cancelBtnEl = document.getElementById('cancelBtn');
+        const confirmBtnEl = document.getElementById('confirmBtn');
+
+        // Initialize the app
+        function init() {
+            checkPasswordStatus();
+            loadNotes();
+            setupEventListeners();
+        }
+
+        // Check if password is set in localStorage
+        function checkPasswordStatus() {
+            const savedPassword = localStorage.getItem('vaultNotesPassword');
+            if (savedPassword) {
+                isPasswordSet = true;
+                encryptionPassword = savedPassword;
+                return;
+            }
+
+            // Show password modal if not set
+            showPasswordModal(false);
+        }
+
+        // Show password modal
+        function showPasswordModal(isChangingPassword) {
+            passwordModalEl.classList.add('active');
+            modalTitleEl.textContent = isChangingPassword ? 'Change Password' : 'Set Encryption Password';
+            confirmPassGroupEl.style.display = isChanging      }
